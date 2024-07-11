@@ -21,9 +21,7 @@ public class Reserva {
     @Column( name = "preciototal")
     private Float preciototal;
     @Column(name = "fecha")
-    private Date fechareserva;
-    @Column( name = "galgasolina")
-    private Float galgasolina;
+    private Date fecha;
     @Column( name = "estado")
     private boolean estado;
 }

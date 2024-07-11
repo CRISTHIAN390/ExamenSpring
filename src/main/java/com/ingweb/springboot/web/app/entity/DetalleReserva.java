@@ -1,5 +1,6 @@
 package com.ingweb.springboot.web.app.entity;
 
+import java.sql.Date;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
@@ -20,6 +21,9 @@ public class DetalleReserva {
     @ManyToOne
     @JoinColumn(name = "idreserva", referencedColumnName = "idreserva")
     private Reserva reserva;
+
+    @Column(name = "galgasolina")
+    private Date galgasolina;
 
     @Column( name = "HoraEntrada")
     private LocalDateTime horaEntrada;
