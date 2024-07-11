@@ -1,5 +1,5 @@
 package com.ingweb.springboot.web.app.entity;
- 
+
 import java.sql.Date;
 import jakarta.persistence.*;
 import lombok.Data;

@@ -11,7 +11,7 @@ public class Rol {
     private int id;
 
     @Column(name = "nombre")
-    private int nombre;
+    private String nombre;
 
     @Column(name = "estado")
     private boolean estado;

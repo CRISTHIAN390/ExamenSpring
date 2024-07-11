@@ -13,7 +13,7 @@ public class User{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "iduser")
-    private Integer id;
+    private int id;
 
     @ManyToOne
     @JoinColumn(name = "idrol", referencedColumnName = "idrol")
