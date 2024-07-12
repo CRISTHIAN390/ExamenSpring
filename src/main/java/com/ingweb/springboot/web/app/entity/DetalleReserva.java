@@ -1,6 +1,5 @@
 package com.ingweb.springboot.web.app.entity;
 
-import java.sql.Date;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
@@ -23,7 +22,7 @@ public class DetalleReserva {
     private Reserva reserva;
 
     @Column(name = "galgasolina")
-    private Date galgasolina;
+    private Float galgasolina;
 
     @Column( name = "HoraEntrada")
     private LocalDateTime horaEntrada;

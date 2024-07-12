@@ -23,7 +23,7 @@ public class Cliente {
     private String apellidos;
     
     @Column(name = "nombres")
-    private int nombres;
+    private String nombres;
 
     @Column(name = "direccion")
     private String direccion;

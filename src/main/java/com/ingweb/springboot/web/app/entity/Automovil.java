@@ -10,7 +10,7 @@ public class Automovil {
     @Column(name = "idautomovil")
     private int id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "idgaraje", referencedColumnName = "idgaraje")
     private Garaje garaje;
 

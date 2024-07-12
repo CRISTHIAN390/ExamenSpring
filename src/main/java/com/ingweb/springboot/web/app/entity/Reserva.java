@@ -20,6 +20,7 @@ public class Reserva {
 
     @Column( name = "preciototal")
     private Float preciototal;
+    
     @Column(name = "fecha")
     private Date fecha;
     @Column( name = "estado")
