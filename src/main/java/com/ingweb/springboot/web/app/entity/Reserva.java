@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 @Entity
+@Table(name = "reserva") // Especifica el nombre de la tabla correctamente
 public class Reserva {
     
     @Id

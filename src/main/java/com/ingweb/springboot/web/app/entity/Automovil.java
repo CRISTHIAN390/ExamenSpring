@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 @Entity
+@Table(name = "automovil") // Especifica el nombre de la tabla correctamente
 public class Automovil {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

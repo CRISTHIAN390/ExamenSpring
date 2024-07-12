@@ -7,6 +7,7 @@ import lombok.Data;
 
 @Data
 @Entity
+@Table(name = "detallereserva") // Especifica el nombre de la tabla correctamente
 public class DetalleReserva {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
