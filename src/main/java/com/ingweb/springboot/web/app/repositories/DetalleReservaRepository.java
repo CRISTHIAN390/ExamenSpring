@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.ingweb.springboot.web.app.entity.DetalleReserva;
 
 public interface DetalleReservaRepository extends JpaRepository<DetalleReserva,Integer>{
-      Optional<DetalleReserva> findById(int id);
+      Optional<DetalleReserva> findById(int iddetalle);
       List<DetalleReserva> findByReservaId(int idReserva); 
       List<DetalleReserva> findByEstadoTrue();
       List<DetalleReserva> findByReservaIdAndEstado(int idReserva, boolean estado);

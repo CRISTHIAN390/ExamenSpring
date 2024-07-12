@@ -4,6 +4,8 @@ import com.ingweb.springboot.web.app.repositories.AutomovilRepository;
 import com.ingweb.springboot.web.app.repositories.DetalleReservaRepository;
 import com.ingweb.springboot.web.app.repositories.GarajeRepository;
 import com.ingweb.springboot.web.app.repositories.ReservaRepository;
+
+
 import com.ingweb.springboot.web.app.entity.DetalleReserva;
 import com.ingweb.springboot.web.app.entity.Reserva;
 import com.ingweb.springboot.web.app.entity.Automovil;
@@ -35,36 +37,18 @@ public class DetalleReservaService {
         return detalleRepository.findByEstadoTrue();
     }
 
+    public DetalleReserva getById(int iddetalle) {
+        Optional<DetalleReserva> detalleFind = detalleRepository.findById(iddetalle);
+       return detalleFind.get();
+    }
+
+    //listar detalles de una reserva
     public List<DetalleReserva> listDexResv(int idReserva) {
         return detalleRepository.findByReservaIdAndEstado(idReserva, true);
     }
-
-    // Motonto total
-    public void MontotlResv(int idReserva) {
-        List<DetalleReserva> lista = detalleRepository.findByReservaIdAndEstado(idReserva, true);
-        // Verificar si la reserva existe
-        Optional<Reserva> reservaOptional = reservRepository.findById(idReserva);
-        if (!reservaOptional.isPresent()) {
-            throw new IllegalArgumentException("Reserva no encontrada");
-        }
-
-        Reserva reserva = reservaOptional.get();
-        float montoTotal = 0;
-
-        for (DetalleReserva detalle : lista) {
-            LocalDateTime horaEntrada = detalle.getHoraEntrada();
-            LocalDateTime horaSalida = detalle.getHoraSalida();
-
-            // Verificar si horaEntrada y horaSalida no son nulos
-            if (horaEntrada != null && horaSalida != null) {
-                int diferenciaHoras = (int) Duration.between(horaEntrada, horaSalida).toHours();
-                montoTotal += detalle.getCostoxhora() * diferenciaHoras;
-            }
-        }
-        reserva.setPreciototal(montoTotal);
-        reservRepository.save(reserva);
-    }
-
+    
+    
+    //guardar un detalle
     public DetalleReserva save(DetalleReserva detalle) {
         try {
             DetalleReserva det = new DetalleReserva();
@@ -219,15 +203,13 @@ public class DetalleReservaService {
         }
     }
 
+    //Eliminar 1 detalle
     public void delete(int iddetallereserva) {
 
         Optional<DetalleReserva> detalle = detalleRepository.findById(iddetallereserva);
         if (!detalle.isPresent()) {
             throw new RuntimeException("No se encontró el detalle de reserva");
         }
-
-
-
         if (detalle != null) {
             // 1. Desactivar el detalle de reserva
             detalle.get().setEstado(false);

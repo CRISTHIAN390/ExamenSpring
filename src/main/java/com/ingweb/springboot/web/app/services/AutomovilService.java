@@ -4,8 +4,6 @@ import com.ingweb.springboot.web.app.entity.Automovil;
 import com.ingweb.springboot.web.app.entity.Garaje;
 import com.ingweb.springboot.web.app.repositories.AutomovilRepository;
 import com.ingweb.springboot.web.app.repositories.GarajeRepository;
-
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,19 +20,19 @@ public class AutomovilService {
     private GarajeRepository garajeRepository;
 
     // Método para listar tods los autos
-    public List<Automovil> listAll() {
-        // Llama al método del repositorio que devuelve tods los clientes activos
+    public List<Automovil> list() {
+        // Llama al método del repositorio que devuelve tods los autos activos
         return automovilRepository.findByEstadoTrue();
     }
 
     // Método para obtener un auto
-    public Automovil getById(int id) {
+    public Automovil getidAuto(int id) {
         Optional<Automovil> autoFind = automovilRepository.findById(id);
         return autoFind.get();
     }
 
     // Método para guardar un auto
-    public Automovil save(Automovil auto) throws IOException{
+    public Automovil save(Automovil auto){
         // Verificar si el garaje existe
         Optional<Garaje> garajeFind = garajeRepository.findById(auto.getGaraje().getId());
         if (garajeFind.isPresent()) {
@@ -50,7 +48,7 @@ public class AutomovilService {
     }
 
     // Método para actualizar un auto existente
-    public Automovil update(int idauto, Automovil autoactualizado) throws IOException {
+    public Automovil update(int idauto, Automovil autoactualizado) {
         Optional<Automovil> autoOptional = automovilRepository.findById(idauto);
     
         if (autoOptional.isPresent()) {
@@ -85,7 +83,7 @@ public class AutomovilService {
     }
 
     // Método para eliminar (desactivar) un auto
-    public void delete(int id) throws IOException {
+    public void delete(int id) {
         Optional<Automovil> autoOptional = automovilRepository.findById(id);
 
         if (autoOptional.isPresent()) {
