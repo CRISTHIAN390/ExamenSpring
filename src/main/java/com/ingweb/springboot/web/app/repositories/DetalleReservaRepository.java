@@ -10,4 +10,6 @@ public interface DetalleReservaRepository extends JpaRepository<DetalleReserva,I
       List<DetalleReserva> findByReservaId(int idReserva); 
       List<DetalleReserva> findByEstadoTrue();
       List<DetalleReserva> findByReservaIdAndEstado(int idReserva, boolean estado);
+      List<DetalleReserva> findByAutomovilId(int idauto);
+
 }

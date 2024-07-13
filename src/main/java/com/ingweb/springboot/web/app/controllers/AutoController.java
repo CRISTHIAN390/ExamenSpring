@@ -17,9 +17,20 @@ public class AutoController {
     @Autowired
     private  AutomovilService automovilService;
 
+
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Automovil>>> list() {
+    public ResponseEntity<ApiResponse<List<Automovil>>> listar() {
         List<Automovil> autos = automovilService.list();
+        ApiResponse<List<Automovil>> response= new ApiResponse<>();
+        response.setStatus(HttpStatus.OK.value());
+        response.setMessage("Lista de autos exitosamente");
+        response.setData(autos);
+        return new ResponseEntity<>(response,HttpStatus.OK);
+    }
+
+    @GetMapping("/activos")
+    public ResponseEntity<ApiResponse<List<Automovil>>> listactivos() {
+        List<Automovil> autos = automovilService.listactivos();
         ApiResponse<List<Automovil>> response= new ApiResponse<>();
         response.setStatus(HttpStatus.OK.value());
         response.setMessage("Lista de autos exitosamente");

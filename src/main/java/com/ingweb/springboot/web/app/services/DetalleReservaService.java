@@ -5,7 +5,6 @@ import com.ingweb.springboot.web.app.repositories.DetalleReservaRepository;
 import com.ingweb.springboot.web.app.repositories.GarajeRepository;
 import com.ingweb.springboot.web.app.repositories.ReservaRepository;
 
-
 import com.ingweb.springboot.web.app.entity.DetalleReserva;
 import com.ingweb.springboot.web.app.entity.Reserva;
 import com.ingweb.springboot.web.app.entity.Automovil;
@@ -16,6 +15,8 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import java.time.LocalDateTime;
 import java.time.Duration;
@@ -39,16 +40,16 @@ public class DetalleReservaService {
 
     public DetalleReserva getById(int iddetalle) {
         Optional<DetalleReserva> detalleFind = detalleRepository.findById(iddetalle);
-       return detalleFind.get();
+        return detalleFind.get();
     }
 
-    //listar detalles de una reserva
+    // listar detalles de una reserva
     public List<DetalleReserva> listDexResv(int idReserva) {
         return detalleRepository.findByReservaIdAndEstado(idReserva, true);
     }
-    
-    
-    //guardar un detalle
+
+    // guardar un detalle de una reserva
+    @Transactional
     public DetalleReserva save(DetalleReserva detalle) {
         try {
             DetalleReserva det = new DetalleReserva();
@@ -83,15 +84,41 @@ public class DetalleReservaService {
             det.setHoraSalida(horaSalida);
             det.setEstado(true);
 
-            // Buscar y actualizar el automovil y garaje
-            Automovil auto;
-            Optional<Automovil> autoopcional = automovilRepository.findById(detalle.getAutomovil().getId());
-            if (autoopcional.isPresent()) {
-                auto = autoopcional.get();
-                auto.setEstado(true);
+            // Buscar el automóvil por matrícula
+            Optional<Automovil> autoExistente = automovilRepository
+                    .findByMatricula(detalle.getAutomovil().getMatricula());
+            if (autoExistente.isPresent()) {
+                // Actualizar el automóvil existente con el nuevo garaje y estado
+                Automovil auto = autoExistente.get();
+                auto.setColor(detalle.getAutomovil().getColor());
+                auto.setModelo(detalle.getAutomovil().getModelo());
+                auto.setMarca(detalle.getAutomovil().getMarca());
+
+                // Desactivar el garaje actual del automóvil
+                Garaje garajeActual = auto.getGaraje();
+                if (garajeActual != null) {
+                    garajeActual.setEstado(true); // Activar el garaje actual
+                    garajeRepository.save(garajeActual);
+                }
+
+                // Asignar y desactivar el nuevo garaje del automóvil
+                Optional<Garaje> nuevoGarajeOptional = garajeRepository
+                        .findById(detalle.getAutomovil().getGaraje().getId());
+                if (nuevoGarajeOptional.isPresent()) {
+                    Garaje nuevoGaraje = nuevoGarajeOptional.get();
+                    nuevoGaraje.setEstado(false); // Desactivar el nuevo garaje
+                    garajeRepository.save(nuevoGaraje);
+                    auto.setGaraje(nuevoGaraje);
+                } else {
+                    throw new RuntimeException("No se encontró el garaje del nuevo automóvil");
+                }
+
+                auto.setEstado(true); // Activar el automóvil
+                auto = automovilRepository.save(auto);
+                det.setAutomovil(auto); // Asignar el automóvil al DetalleReserva
             } else {
-                // Crear un nuevo automóvil si no existe
-                auto = new Automovil();
+                // Crear un nuevo automóvil
+                Automovil auto = new Automovil();
                 auto.setMatricula(detalle.getAutomovil().getMatricula());
                 auto.setColor(detalle.getAutomovil().getColor());
                 auto.setModelo(detalle.getAutomovil().getModelo());
@@ -108,10 +135,13 @@ public class DetalleReservaService {
                 } else {
                     throw new RuntimeException("No se encontró el garaje del nuevo automóvil");
                 }
-            }
-            automovilRepository.save(auto);
-            det.setAutomovil(auto);
 
+                // Guardar el nuevo automóvil
+                auto = automovilRepository.save(auto);
+                det.setAutomovil(auto); // Asignar el automóvil al DetalleReserva
+            }
+
+            // Guardar el DetalleReserva
             return detalleRepository.save(det);
         } catch (Exception e) {
             throw new RuntimeException("Error al crear un detalle", e);
@@ -119,6 +149,7 @@ public class DetalleReservaService {
     }
 
     // Método para actualizar un detalle
+    @Transactional
     public DetalleReserva update(int iddetalleanterior, DetalleReserva detalleactualizado) {
         try {
             // Buscar el detalle anterior
@@ -128,106 +159,89 @@ public class DetalleReservaService {
             }
 
             DetalleReserva detalleAnterior = detalleOptional.get();
-            DetalleReserva detalle = detalleactualizado;
 
             // Buscar la reserva
-            Optional<Reserva> reservaa = reservRepository.findById(detalle.getReserva().getId());
-            if (reservaa.isPresent()) {
-                detalle.setReserva(reservaa.get());
-            } else {
+            Optional<Reserva> reservaa = reservRepository.findById(detalleAnterior.getReserva().getId());
+            if (!reservaa.isPresent()) {
                 throw new RuntimeException("No se encontró la reserva");
             }
 
+            Reserva reserva = reservaa.get();
+
             // Calcular el costo del nuevo detalle
-            LocalDateTime horaEntrada = detalle.getHoraEntrada();
-            LocalDateTime horaSalida = detalle.getHoraSalida();
-            float costoxhora = detalle.getCostoxhora();
+            LocalDateTime horaEntrada = detalleactualizado.getHoraEntrada();
+            LocalDateTime horaSalida = detalleactualizado.getHoraSalida();
+            float costoxhora = detalleactualizado.getCostoxhora();
 
             Duration duration = Duration.between(horaEntrada, horaSalida);
             long hours = duration.toHours();
             float totalCost = hours * costoxhora;
 
-            // Sumar el costo del detalle actual al costo total de la reserva
-            Reserva reserva = detalle.getReserva();
-            float previousTotalCost = reserva.getPreciototal();
+            // Actualizar el costo total de la reserva
             float previousDetailCost = Duration
                     .between(detalleAnterior.getHoraEntrada(), detalleAnterior.getHoraSalida()).toHours()
                     * detalleAnterior.getCostoxhora();
-            float newTotalCost = previousTotalCost - previousDetailCost + totalCost;
+            float newTotalCost = reserva.getPreciototal() - previousDetailCost + totalCost;
             reserva.setPreciototal(newTotalCost);
             reservRepository.save(reserva);
 
             // Actualizar los detalles del DetalleReserva
-            detalle.setId(iddetalleanterior);
-            detalle.setGalgasolina(detalle.getGalgasolina());
-            detalle.setCostoxhora(costoxhora);
-            detalle.setHoraEntrada(horaEntrada);
-            detalle.setHoraSalida(horaSalida);
-            detalle.setEstado(true);
+            detalleAnterior.setGalgasolina(detalleactualizado.getGalgasolina());
+            detalleAnterior.setCostoxhora(costoxhora);
+            detalleAnterior.setHoraEntrada(horaEntrada);
+            detalleAnterior.setHoraSalida(horaSalida);
+            detalleAnterior.setEstado(true);
 
-            // Actualizar el automóvil y verificar cambios de estado
-            Automovil autoAnterior = detalleAnterior.getAutomovil();
-            Automovil autoActualizado = detalle.getAutomovil();
-            if (autoAnterior.getId() != autoActualizado.getId()) {
-                autoAnterior.setEstado(false);
-                automovilRepository.save(autoAnterior);
-                autoActualizado.setEstado(true);
-                automovilRepository.save(autoActualizado);
-
-                // Verificar cambios en el garaje
-                if (autoAnterior.getGaraje().getId() != autoActualizado.getGaraje().getId()) {
-                    Garaje garajeAnterior = autoAnterior.getGaraje();
-                    Garaje garajeActualizado = autoActualizado.getGaraje();
-                    garajeAnterior.setEstado(true);
-                    garajeRepository.save(garajeAnterior);
-                    garajeActualizado.setEstado(false);
-                    garajeRepository.save(garajeActualizado);
-                }
-            } else {
-                // Verificar solo cambios en el garaje
-                if (autoAnterior.getGaraje().getId() != autoActualizado.getGaraje().getId()) {
-                    Garaje garajeAnterior = autoAnterior.getGaraje();
-                    Garaje garajeActualizado = autoActualizado.getGaraje();
-                    garajeAnterior.setEstado(true);
-                    garajeRepository.save(garajeAnterior);
-                    garajeActualizado.setEstado(false);
-                    garajeRepository.save(garajeActualizado);
-                }
-            }
-
-            detalle.setAutomovil(autoActualizado);
-
-            return detalleRepository.save(detalle);
+            // Guardar el DetalleReserva actualizado
+            return detalleRepository.save(detalleAnterior);
         } catch (Exception e) {
             throw new RuntimeException("Error al actualizar un detalle", e);
         }
     }
 
-    //Eliminar 1 detalle
-    public void delete(int iddetallereserva) {
-
-        Optional<DetalleReserva> detalle = detalleRepository.findById(iddetallereserva);
-        if (!detalle.isPresent()) {
-            throw new RuntimeException("No se encontró el detalle de reserva");
+    // Eliminar un detalle de mi reserva
+    @Transactional
+    public void delete(int idDetalleReserva) {
+        // Buscar el detalle de reserva por su ID
+        Optional<DetalleReserva> detalleOptional = detalleRepository.findById(idDetalleReserva);
+        if (detalleOptional.isEmpty()) {
+            throw new RuntimeException("No se encontró el detalle de reserva con ID: " + idDetalleReserva);
         }
-        if (detalle != null) {
-            // 1. Desactivar el detalle de reserva
-            detalle.get().setEstado(false);
-            detalleRepository.save( detalle.get());
 
-            // 2. Obtener el auto asociado y desactivarlo
-            Automovil auto = detalle.get().getAutomovil();
-            if (auto != null) {
-                auto.setEstado(false);
-                automovilRepository.save(auto);
+        DetalleReserva detalleReserva = detalleOptional.get();
 
-                // 3. Obtener el garaje asociado al auto y activarlo
-                Garaje garaje = auto.getGaraje();
-                if (garaje != null) {
-                    garaje.setEstado(true);
-                    garajeRepository.save(garaje);
-                }
+        // Desactivar el detalle de reserva (cambio de estado a false)
+        detalleReserva.setEstado(false);
+        detalleRepository.save(detalleReserva);
+
+        // Obtener el automóvil asociado y desactivarlo
+        Automovil automovil = detalleReserva.getAutomovil();
+        if (automovil != null) {
+            automovil.setEstado(false);
+            automovilRepository.save(automovil);
+
+            // Obtener el garaje asociado al automóvil y activarlo
+            Garaje garaje = automovil.getGaraje();
+            if (garaje != null) {
+                garaje.setEstado(true);
+                garajeRepository.save(garaje);
             }
         }
+
+        // Calcular el costo del detalle eliminado
+        LocalDateTime horaEntrada = detalleReserva.getHoraEntrada();
+        LocalDateTime horaSalida = detalleReserva.getHoraSalida();
+        float costoPorHora = detalleReserva.getCostoxhora();
+
+        Duration duracion = Duration.between(horaEntrada, horaSalida);
+        long horas = duracion.toHours();
+        float costoDetalle = horas * costoPorHora;
+
+        // Actualizar el precio total de la reserva
+        Reserva reserva = detalleReserva.getReserva();
+        float nuevoPrecioTotal = reserva.getPreciototal() - costoDetalle;
+        reserva.setPreciototal(nuevoPrecioTotal);
+        reservRepository.save(reserva);
+
     }
 }

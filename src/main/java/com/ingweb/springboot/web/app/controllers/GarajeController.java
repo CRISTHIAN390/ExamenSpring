@@ -27,6 +27,16 @@ public class GarajeController {
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
 
+    @GetMapping("/activos")
+    public ResponseEntity<ApiResponse<List<Garaje>>> listactivos() {
+        List<Garaje> garajes = garajeservice.listActivos();
+        ApiResponse<List<Garaje>> response= new ApiResponse<>();
+        response.setStatus(HttpStatus.OK.value());
+        response.setMessage("Lista de Garajes activos exitosamente");
+        response.setData(garajes);
+        return new ResponseEntity<>(response,HttpStatus.OK);
+    }
+
     @PostMapping
     public ResponseEntity<ApiResponse<Garaje>> create(@RequestBody Garaje garajeRequest){
         Garaje garaje= garajeservice.save(garajeRequest);

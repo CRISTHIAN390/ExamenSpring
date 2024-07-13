@@ -17,7 +17,7 @@ public class ClienteService {
     // Método para listar tods los clientes
     public List<Cliente> listAll() {
         // Llama al método del repositorio que devuelve tods los clientes activos
-        return clienteRepository.findByEstadoTrue();
+        return clienteRepository.findAll();
     }
 
     // Método para obtener un cliente

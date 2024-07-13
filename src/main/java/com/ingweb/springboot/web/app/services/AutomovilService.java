@@ -4,8 +4,10 @@ import com.ingweb.springboot.web.app.entity.Automovil;
 import com.ingweb.springboot.web.app.entity.Garaje;
 import com.ingweb.springboot.web.app.repositories.AutomovilRepository;
 import com.ingweb.springboot.web.app.repositories.GarajeRepository;
+
 import java.util.List;
 import java.util.Optional;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,12 @@ public class AutomovilService {
 
     // Método para listar tods los autos
     public List<Automovil> list() {
+        // Llama al método del repositorio que devuelve tods los autos
+        return automovilRepository.findAll();
+    }
+
+    // Método para listar tods los autos activos
+    public List<Automovil> listactivos() {
         // Llama al método del repositorio que devuelve tods los autos activos
         return automovilRepository.findByEstadoTrue();
     }
@@ -32,7 +40,7 @@ public class AutomovilService {
     }
 
     // Método para guardar un auto
-    public Automovil save(Automovil auto){
+    public Automovil save(Automovil auto) {
         // Verificar si el garaje existe
         Optional<Garaje> garajeFind = garajeRepository.findById(auto.getGaraje().getId());
         if (garajeFind.isPresent()) {
@@ -47,64 +55,72 @@ public class AutomovilService {
         }
     }
 
-    // Método para actualizar un auto existente
     public Automovil update(int idauto, Automovil autoactualizado) {
+        // Buscar el automóvil por su ID
         Optional<Automovil> autoOptional = automovilRepository.findById(idauto);
-    
+
         if (autoOptional.isPresent()) {
             Automovil autoExistente = autoOptional.get();
+
+            // Obtener el garaje anterior
             Garaje garajeAnterior = autoExistente.getGaraje();
-            Garaje nuevoGaraje = autoactualizado.getGaraje();
-    
-            if (garajeAnterior != null && !garajeAnterior.equals(nuevoGaraje)) {
-                // Activar el garaje anterior
-                garajeAnterior.setEstado(true);
-                garajeRepository.save(garajeAnterior);
-            }
-    
-            if (nuevoGaraje != null && !nuevoGaraje.equals(garajeAnterior)) {
-                // Desactivar el nuevo garaje
-                Optional<Garaje> nuevoGarajeOptional = garajeRepository.findById(nuevoGaraje.getId());
-                if (nuevoGarajeOptional.isPresent()) {
-                    Garaje garajeToUpdate = nuevoGarajeOptional.get();
-                    garajeToUpdate.setEstado(false);
-                    garajeRepository.save(garajeToUpdate);
-                } else {
-                    throw new IllegalArgumentException("Garaje no encontrado con id " + nuevoGaraje.getId());
+
+            // Si el estado del automóvil está cambiando a desactivado
+            if (!autoactualizado.isEstado() && autoExistente.isEstado()) {
+                // Activar el garaje anterior si existe
+                if (garajeAnterior != null) {
+                    garajeAnterior.setEstado(true);
+                    garajeRepository.save(garajeAnterior);
+                }
+            } else if (autoactualizado.isEstado() && !autoExistente.isEstado()) {
+                // Desactivar el garaje anterior si existe
+                if (garajeAnterior != null) {
+                    garajeAnterior.setEstado(false);
+                    garajeRepository.save(garajeAnterior);
                 }
             }
-    
-            // Actualizar el automóvil
-            autoactualizado.setId(idauto);
-            return automovilRepository.save(autoactualizado);
+
+            // Actualizar los campos del automóvil existente con los valores del automóvil
+            // actualizado
+            autoExistente.setMatricula(autoactualizado.getMatricula());
+            autoExistente.setColor(autoactualizado.getColor());
+            autoExistente.setModelo(autoactualizado.getModelo());
+            autoExistente.setMarca(autoactualizado.getMarca());
+            autoExistente.setEstado(autoactualizado.isEstado());
+
+            // Guardar y devolver el automóvil actualizado
+            return automovilRepository.save(autoExistente);
         } else {
             throw new IllegalArgumentException("Automóvil no encontrado con id " + idauto);
         }
     }
 
-    // Método para eliminar (desactivar) un auto
-    public void delete(int id) {
-        Optional<Automovil> autoOptional = automovilRepository.findById(id);
+    // Método para eliminar (desactivar) un auto y activar su garaje
+    public void delete(int idauto) {
+        // Buscar el automóvil por su ID
+        Optional<Automovil> autoOptional = automovilRepository.findById(idauto);
 
         if (autoOptional.isPresent()) {
             Automovil auto = autoOptional.get();
             Garaje garaje = auto.getGaraje();
 
-            // Verificar si el garaje asociado al automóvil existe
-            if (garaje != null) {
-                Optional<Garaje> garajeOptional = garajeRepository.findById(garaje.getId());
-                if (garajeOptional.isPresent()) {
-                    Garaje garajeToUpdate = garajeOptional.get();
-                    garajeToUpdate.setEstado(true);
-                    garajeRepository.save(garajeToUpdate);
-                } else {
-                    throw new IllegalArgumentException("Garaje no encontrado con id " + garaje.getId());
+            // Verificar si el automóvil está activo
+            if (auto.isEstado()) {
+                // Desactivar el automóvil
+                auto.setEstado(false);
+                automovilRepository.save(auto);
+
+                // Activar el garaje asociado si existe
+                if (garaje != null) {
+                    garaje.setEstado(true);
+                    garajeRepository.save(garaje);
                 }
+            } else {
+                // Si el automóvil ya está desactivado, no hacer nada
+                System.out.println("El automóvil ya está desactivado, no se realizó ninguna acción.");
             }
-            auto.setEstado(false);
-            automovilRepository.save(auto);
         } else {
-            throw new IllegalArgumentException("Automóvil no encontrado con id " + id);
+            throw new IllegalArgumentException("Automóvil no encontrado con id " + idauto);
         }
     }
 }

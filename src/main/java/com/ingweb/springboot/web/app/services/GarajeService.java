@@ -21,6 +21,14 @@ public class GarajeService {
         return garajeRepository.findAll();
     }
 
+    // Método para listar tods los garajes
+    public List<Garaje> listActivos() {
+        // Llama al método del repositorio que devuelve tods los garajes activos 
+        return garajeRepository.findByEstadoTrue();
+    }
+
+
+
     // Método para obtener un garaje
     public Garaje getById(int id) {
         Optional<Garaje> garajeFind = garajeRepository.findById(id);
