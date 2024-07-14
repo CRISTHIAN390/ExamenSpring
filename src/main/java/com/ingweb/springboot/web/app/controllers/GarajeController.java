@@ -29,7 +29,7 @@ public class GarajeController {
 
     @GetMapping("/activos")
     public ResponseEntity<ApiResponse<List<Garaje>>> listactivos() {
-        List<Garaje> garajes = garajeservice.listActivos();
+        List<Garaje> garajes = garajeservice.listGaraActivos();
         ApiResponse<List<Garaje>> response= new ApiResponse<>();
         response.setStatus(HttpStatus.OK.value());
         response.setMessage("Lista de Garajes activos exitosamente");

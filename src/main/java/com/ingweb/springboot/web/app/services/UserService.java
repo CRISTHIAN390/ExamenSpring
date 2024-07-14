@@ -34,6 +34,7 @@ public class UserService {
         Rol role = roleRepository.findById(resource.getRol()).orElseThrow(() -> new IllegalArgumentException("Default role not found"));
         if (userRepository.existsById(id)) {
             User user = userRepository.findById(id);
+            user.setUsername(resource.getUsername());
             user.setEmail(resource.getEmail());
             user.setRol(role);
             if(resource.getPassword()!=""){

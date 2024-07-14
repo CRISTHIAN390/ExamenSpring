@@ -15,33 +15,25 @@ public class GarajeService {
     @Autowired
     private GarajeRepository garajeRepository;
 
-    // Método para listar tods los garajes
     public List<Garaje> list() {
-        // Llama al método del repositorio que devuelve tods los garajes 
         return garajeRepository.findAll();
     }
 
-    // Método para listar tods los garajes
-    public List<Garaje> listActivos() {
-        // Llama al método del repositorio que devuelve tods los garajes activos 
+    public List<Garaje> listGaraActivos() {
         return garajeRepository.findByEstadoTrue();
     }
 
-
-
-    // Método para obtener un garaje
     public Garaje getById(int id) {
         Optional<Garaje> garajeFind = garajeRepository.findById(id);
         return garajeFind.get();
     }
 
-    // Método para guardar un garaje
+
     public Garaje save(Garaje resource) {
         resource.setEstado(true);
         return garajeRepository.save(resource);
     }
 
-    // Método para actualizar un garaje existente
     public Garaje update(int id, Garaje resource) {
         if (garajeRepository.existsById(id)) {
             resource.setId(id);
@@ -50,7 +42,6 @@ public class GarajeService {
             return null;
     }
 
-    // Método para eliminar (desactivar) un garaje
     public void delete(int id) {
         Optional<Garaje> garaje = garajeRepository.findById(id);
         garaje.get().setEstado(false);

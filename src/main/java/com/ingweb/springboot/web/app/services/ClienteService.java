@@ -14,22 +14,31 @@ import lombok.RequiredArgsConstructor;
 public class ClienteService {
     @Autowired
     private ClienteRepository clienteRepository;
-    // Método para listar tods los clientes
+
+
     public List<Cliente> listAll() {
-        // Llama al método del repositorio que devuelve tods los clientes activos
         return clienteRepository.findAll();
     }
 
-    // Método para obtener un cliente
+    
     public Cliente getById(int id) {
         Optional<Cliente> clienteFind = clienteRepository.findById(id);
         return clienteFind.get();
     }
 
-    // Método para guardar un cliente
     public Cliente save(Cliente resource) {
-        resource.setEstado(true);
-        return clienteRepository.save(resource);
+        Optional<Cliente> clienteFind = clienteRepository.findByDni(resource.getDni());
+        if (clienteFind.isPresent()) {
+            resource.setId(clienteFind.get().getId());
+            return clienteRepository.save(resource);
+        }
+        clienteFind.get().setNombres(resource.getNombres());
+        clienteFind.get().setApellidos(resource.getApellidos());
+        clienteFind.get().setDni(resource.getDni());
+        clienteFind.get().setDireccion(resource.getDireccion());
+        clienteFind.get().setTelefono(resource.getTelefono());
+        clienteFind.get().setEstado(true);
+        return clienteRepository.save(clienteFind.get());
     }
     // Método para actualizar un cliente existente
     public Cliente update(int id, Cliente resource) {
@@ -43,6 +52,7 @@ public class ClienteService {
     // Método para eliminar (desactivar) un cliente
     public void delete(int id) {
         Optional<Cliente> cliente = clienteRepository.findById(id);
+        cliente.get().setId(id);
         cliente.get().setEstado(false);
         clienteRepository.save(cliente.get());
     }

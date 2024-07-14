@@ -50,7 +50,7 @@ public class AutoController {
 
     
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Automovil>> edit(@PathVariable int id, @RequestBody Automovil autoRequest){
+    public ResponseEntity<ApiResponse<Automovil>> edit(@PathVariable String id, @RequestBody Automovil autoRequest){
         Automovil auto= automovilService.update(id,autoRequest);
         ApiResponse<Automovil> response=new ApiResponse<>();
         response.setStatus(HttpStatus.OK.value());
@@ -60,7 +60,7 @@ public class AutoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Automovil>> getById(@PathVariable int id){
+    public ResponseEntity<ApiResponse<Automovil>> getById(@PathVariable String id){
         Automovil automovil= automovilService.getidAuto(id);
         ApiResponse<Automovil> response=new ApiResponse<>();
         response.setStatus(HttpStatus.OK.value());
@@ -70,12 +70,11 @@ public class AutoController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Automovil>> delete(@PathVariable int id){
+    public ResponseEntity<ApiResponse<Automovil>> delete(@PathVariable String id){
         automovilService.delete(id);
         ApiResponse<Automovil> response=new ApiResponse<>();
         response.setStatus(HttpStatus.OK.value());
         response.setMessage("Automovil eliminado exitosamente");
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
-
 }

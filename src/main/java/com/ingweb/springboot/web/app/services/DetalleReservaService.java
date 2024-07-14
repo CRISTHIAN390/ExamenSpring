@@ -33,11 +33,12 @@ public class DetalleReservaService {
     @Autowired
     private GarajeRepository garajeRepository;
 
-    // Método para obtener
+    // Método para obtener detalles activos
     public List<DetalleReserva> list() {
         return detalleRepository.findByEstadoTrue();
     }
 
+    // Método para obtener un detalle
     public DetalleReserva getById(int iddetalle) {
         Optional<DetalleReserva> detalleFind = detalleRepository.findById(iddetalle);
         return detalleFind.get();
@@ -102,21 +103,20 @@ public class DetalleReservaService {
                 }
 
                 // Asignar y desactivar el nuevo garaje del automóvil
-                Optional<Garaje> nuevoGarajeOptional = garajeRepository
-                        .findById(detalle.getAutomovil().getGaraje().getId());
+                Optional<Garaje> nuevoGarajeOptional = garajeRepository.findById(detalle.getAutomovil().getGaraje().getId());
                 if (nuevoGarajeOptional.isPresent()) {
                     Garaje nuevoGaraje = nuevoGarajeOptional.get();
                     nuevoGaraje.setEstado(false); // Desactivar el nuevo garaje
                     garajeRepository.save(nuevoGaraje);
                     auto.setGaraje(nuevoGaraje);
-                } else {
+                }else{
                     throw new RuntimeException("No se encontró el garaje del nuevo automóvil");
                 }
 
                 auto.setEstado(true); // Activar el automóvil
                 auto = automovilRepository.save(auto);
                 det.setAutomovil(auto); // Asignar el automóvil al DetalleReserva
-            } else {
+            } else{
                 // Crear un nuevo automóvil
                 Automovil auto = new Automovil();
                 auto.setMatricula(detalle.getAutomovil().getMatricula());
@@ -178,9 +178,7 @@ public class DetalleReservaService {
             float totalCost = hours * costoxhora;
 
             // Actualizar el costo total de la reserva
-            float previousDetailCost = Duration
-                    .between(detalleAnterior.getHoraEntrada(), detalleAnterior.getHoraSalida()).toHours()
-                    * detalleAnterior.getCostoxhora();
+            float previousDetailCost = Duration.between(detalleAnterior.getHoraEntrada(), detalleAnterior.getHoraSalida()).toHours()* detalleAnterior.getCostoxhora();
             float newTotalCost = reserva.getPreciototal() - previousDetailCost + totalCost;
             reserva.setPreciototal(newTotalCost);
             reservRepository.save(reserva);

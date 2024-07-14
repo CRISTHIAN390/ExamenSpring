@@ -11,12 +11,6 @@ public class Cliente {
     @Column(name = "idcliente")
     private int id;
     
-    // Muchos clientes pueden ser registrados por un usuario
-    @ManyToOne
-    @JoinColumn(name = "iduser", referencedColumnName = "iduser")
-    private User user;
-
-
     @Column(name = "dni")
     private String dni;
 

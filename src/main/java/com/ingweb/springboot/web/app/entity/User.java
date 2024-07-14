@@ -20,10 +20,12 @@ public class User{
     @JoinColumn(name = "idrol", referencedColumnName = "idrol")
     private Rol rol;
 
-    @Column( name = "email")
-    private String email;
-    @Column( name = "password")
-    private String password;
+    @Column(nullable = false, name = "username")
+    String username;
+    @Column(nullable = false, name = "email")
+    String email;
+    @Column(nullable = false, name = "password")
+    String password;
     @Column(name = "estado")
-    private boolean estado;
+    boolean estado;
 }

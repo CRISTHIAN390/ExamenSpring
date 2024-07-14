@@ -8,7 +8,6 @@ import com.ingweb.springboot.web.app.repositories.GarajeRepository;
 import java.util.List;
 import java.util.Optional;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
@@ -23,28 +22,25 @@ public class AutomovilService {
 
     // Método para listar tods los autos
     public List<Automovil> list() {
-        // Llama al método del repositorio que devuelve tods los autos
         return automovilRepository.findAll();
     }
 
     // Método para listar tods los autos activos
     public List<Automovil> listactivos() {
-        // Llama al método del repositorio que devuelve tods los autos activos
         return automovilRepository.findByEstadoTrue();
     }
 
     // Método para obtener un auto
-    public Automovil getidAuto(int id) {
-        Optional<Automovil> autoFind = automovilRepository.findById(id);
+    public Automovil getidAuto(String matricula) {
+        Optional<Automovil> autoFind = automovilRepository.findByMatricula(matricula);
         return autoFind.get();
     }
 
     // Método para guardar un auto
     public Automovil save(Automovil auto) {
-        // Verificar si el garaje existe
+
         Optional<Garaje> garajeFind = garajeRepository.findById(auto.getGaraje().getId());
         if (garajeFind.isPresent()) {
-            // Cambiar el estado del garaje a false
             Garaje garaje = garajeFind.get();
             garaje.setEstado(false);
             garajeRepository.save(garaje);
@@ -55,14 +51,11 @@ public class AutomovilService {
         }
     }
 
-    public Automovil update(int idauto, Automovil autoactualizado) {
-        // Buscar el automóvil por su ID
-        Optional<Automovil> autoOptional = automovilRepository.findById(idauto);
-
+    public Automovil update(String idauto, Automovil autoactualizado) {
+        Optional<Automovil> autoOptional = automovilRepository.findByMatricula(idauto);
         if (autoOptional.isPresent()) {
             Automovil autoExistente = autoOptional.get();
 
-            // Obtener el garaje anterior
             Garaje garajeAnterior = autoExistente.getGaraje();
 
             // Si el estado del automóvil está cambiando a desactivado
@@ -79,26 +72,23 @@ public class AutomovilService {
                     garajeRepository.save(garajeAnterior);
                 }
             }
-
-            // Actualizar los campos del automóvil existente con los valores del automóvil
-            // actualizado
+            // Actualizamos los campos del automóvil
             autoExistente.setMatricula(autoactualizado.getMatricula());
             autoExistente.setColor(autoactualizado.getColor());
             autoExistente.setModelo(autoactualizado.getModelo());
             autoExistente.setMarca(autoactualizado.getMarca());
             autoExistente.setEstado(autoactualizado.isEstado());
 
-            // Guardar y devolver el automóvil actualizado
             return automovilRepository.save(autoExistente);
         } else {
             throw new IllegalArgumentException("Automóvil no encontrado con id " + idauto);
         }
     }
 
-    // Método para eliminar (desactivar) un auto y activar su garaje
-    public void delete(int idauto) {
+    // Método para  (desactivar) un auto y activar su garaje
+    public void delete(String matriculauto) {
         // Buscar el automóvil por su ID
-        Optional<Automovil> autoOptional = automovilRepository.findById(idauto);
+        Optional<Automovil> autoOptional = automovilRepository.findByMatricula(matriculauto);
 
         if (autoOptional.isPresent()) {
             Automovil auto = autoOptional.get();
@@ -116,11 +106,10 @@ public class AutomovilService {
                     garajeRepository.save(garaje);
                 }
             } else {
-                // Si el automóvil ya está desactivado, no hacer nada
-                System.out.println("El automóvil ya está desactivado, no se realizó ninguna acción.");
+                System.out.println("El automóvil ya está desactivado existosamente");
             }
         } else {
-            throw new IllegalArgumentException("Automóvil no encontrado con id " + idauto);
+            throw new IllegalArgumentException("Automóvil no encontrado con id " + matriculauto);
         }
     }
 }

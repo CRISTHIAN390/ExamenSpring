@@ -5,6 +5,6 @@ import java.util.List;
 import java.util.Optional;
 public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
     Optional<Reserva> findById(int id);
-    List<Reserva> findByClienteId(int idcliente);
+    List<Reserva> findByClienteDni(String idcliente);
     List<Reserva> findByEstadoTrue();
 }

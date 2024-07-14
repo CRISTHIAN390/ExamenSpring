@@ -29,7 +29,7 @@ public class ReservaController {
     }
 
     @GetMapping("/list/{id}")
-    public ResponseEntity<ApiResponse<List<Reserva>>> Hiscliente(@PathVariable int id) {
+    public ResponseEntity<ApiResponse<List<Reserva>>> Hiscliente(@PathVariable String id) {
         List<Reserva> reservs = reservaService.HistorialxCliente(id);
         ApiResponse<List<Reserva>> response= new ApiResponse<>();
         response.setStatus(HttpStatus.OK.value());

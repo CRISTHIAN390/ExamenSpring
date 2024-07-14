@@ -3,6 +3,7 @@ import lombok.Data;
 
 @Data
 public class UserEditReq {
+    String username;
     String email;
     String password;
     int rol;
