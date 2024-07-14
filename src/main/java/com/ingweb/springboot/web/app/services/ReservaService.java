@@ -11,7 +11,6 @@ import com.ingweb.springboot.web.app.repositories.DetalleReservaRepository;
 import com.ingweb.springboot.web.app.repositories.GarajeRepository;
 import com.ingweb.springboot.web.app.repositories.ReservaRepository;
 
-import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
